@@ -1,73 +1,63 @@
 package controller
 
 import (
-	"golangGin/models"
-	"golangGin/service"
+	"example-evrone/internal/entity"
+	"example-evrone/internal/usecase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserController struct {
-	UserService service.UserService
+type TodoController struct {
+	TodoUsecase usecase.TodoService
 }
 
-func NewUserController(userService service.UserService) UserController {
-	return UserController{
-		UserService: userService,
+func NewTodoController(todoService usecase.TodoService) TodoController {
+	return TodoController{
+		TodoUsecase: todoService,
 	}
 }
 
-func (uc *UserController) CreateUser(ctx *gin.Context) {
-	var user models.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+func (tc *TodoController) CreateTodo(ctx *gin.Context) {
+	var todo entity.Todo
+	if err := ctx.ShouldBindJSON(&todo); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	err := uc.UserService.CreateUser(&user)
+	err := tc.TodoUsecase.CreateTodo(&todo)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
-func (uc *UserController) GetUser(ctx *gin.Context) {
-	var username string = ctx.Param("name")
-	user, err := uc.UserService.GetUser(&username)
+func (tc *TodoController) GetTodo(ctx *gin.Context) {
+	var taskName string = ctx.Param("name")
+	todo, err := tc.TodoUsecase.GetTodo(&taskName)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, todo)
 }
 
-func (uc *UserController) GetAll(ctx *gin.Context) {
-	users, err := uc.UserService.GetAll()
+func (tc *TodoController) GetAll(ctx *gin.Context) {
+	todos, err := tc.TodoUsecase.GetAll()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, users)
+	ctx.JSON(http.StatusOK, todos)
 }
 
-func (uc *UserController) UpdateUser(ctx *gin.Context) {
-	var user models.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+func (tc *TodoController) UpdateTodo(ctx *gin.Context) {
+	var todo entity.Todo
+	if err := ctx.ShouldBindJSON(&todo); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	err := uc.UserService.UpdateUser(&user)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
-}
-
-func (uc *UserController) DeleteUser(ctx *gin.Context) {
-	username := ctx.Param("name")
-	err := uc.UserService.DeleteUser(&username)
+	err := tc.TodoUsecase.UpdateTodo(&todo)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -75,13 +65,23 @@ func (uc *UserController) DeleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
-// grouping the route for anything that has prefix /user routes
-func (uc *UserController) RegisterUserRoutes(registerGroup *gin.RouterGroup) {
-	userRoute := registerGroup.Group("/user")
+func (tc *TodoController) DeleteTodo(ctx *gin.Context) {
+	taskName := ctx.Param("name")
+	err := tc.TodoUsecase.DeleteTodo(&taskName)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
+}
 
-	userRoute.POST("/create", uc.CreateUser)
-	userRoute.GET("/get/:name", uc.GetUser)
-	userRoute.GET("/get", uc.GetAll)
-	userRoute.POST("/update", uc.UpdateUser)
-	userRoute.DELETE("/delete/:name", uc.DeleteUser)
+// grouping the route for anything that has prefix /todo routes
+func (tc *TodoController) RegisterTodoRoutes(registerGroup *gin.RouterGroup) {
+	todoRoute := registerGroup.Group("/todo")
+
+	todoRoute.POST("/create", tc.CreateTodo)
+	todoRoute.GET("/get/:name", tc.GetTodo)
+	todoRoute.GET("/get", tc.GetAll)
+	todoRoute.POST("/update", tc.UpdateTodo)
+	todoRoute.DELETE("/delete/:name", tc.DeleteTodo)
 }

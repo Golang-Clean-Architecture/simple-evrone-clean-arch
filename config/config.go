@@ -11,7 +11,6 @@ type (
 	Config struct {
 		App   `yaml:"app"`
 		HTTP  `yaml:"http"`
-		Log   `yaml:"logger"`
 		Mongo `yaml:"mongodb"`
 	}
 
@@ -26,14 +25,9 @@ type (
 		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
-	// Log -.
-	Log struct {
-		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
-	}
-
 	// PG -.
 	Mongo struct {
-		URL string `env-required:"true"                 env:"MONGODB_URL"`
+		URL string `env-required:"true" yaml:"url" env:"MONGODB_URL"`
 	}
 )
 

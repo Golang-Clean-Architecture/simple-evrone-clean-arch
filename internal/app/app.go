@@ -5,6 +5,7 @@ import (
 	"context"
 	"example-evrone/config"
 	"example-evrone/internal/controller"
+	"example-evrone/internal/usecase"
 	"fmt"
 	"log"
 
@@ -12,17 +13,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/evrone/go-clean-template/config"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repo"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	server         *gin.Engine
+	todoService    usecase.TodoService
+	todoController controller.TodoController
+	ctx            context.Context
+	todoCollection *mongo.Collection
+	mongoClient    *mongo.Client
 )
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	l := logger.New(cfg.Log.Level)
 	defer mongoClient.Disconnect(ctx)
 
 	// Repository
@@ -38,35 +42,18 @@ func Run(cfg *config.Config) {
 	}
 
 	fmt.Println("MongoDB connection is successfull!")
+	todoCollection = mongoClient.Database("tododb").Collection("todos")
 	// Use case
-	translationUseCase := usecase.New(
-		repo.New(mongoClient),
-		webapi.New(),
-	)
+	todoService = usecase.NewTodoService(todoCollection, ctx)
+
+	// // Controller
+	todoController = controller.NewTodoController(todoService)
 
 	// HTTP Server
-	// handler := gin.New()
-	// v1.NewRouter(handler, l, translationUseCase)
-	// httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
-	var server *gin.Engine = gin.Default
+	server = gin.Default()
 	basePath := server.Group("/v1")
-	controller.UserController.RegisterUserRoutes(basePath)
+	todoController.RegisterTodoRoutes(basePath)
 
 	log.Fatal(server.Run(":8080"))
 
-	// // Waiting signal
-	// interrupt := make(chan os.Signal, 1)
-	// signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-	// select {
-	// case s := <-interrupt:
-	// 	l.Info("app - Run - signal: " + s.String())
-	// case err = <-httpServer.Notify():
-	// 	l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
-
-	// // Shutdown
-	// err = httpServer.Shutdown()
-	// if err != nil {
-	// 	l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
-	// }
 }
