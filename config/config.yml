@@ -3,7 +3,4 @@ app:
   version: '1.0.0'
 
 http:
-  port: '8080'
-
-mongodb:
-  url: 'mongodb://localhost:27017'
+  port: 8080
