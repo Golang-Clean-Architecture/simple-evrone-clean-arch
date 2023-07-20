@@ -11,7 +11,7 @@ type (
 	Config struct {
 		App   `yaml:"app"`
 		HTTP  `yaml:"http"`
-		Mongo `yaml:"mongodb"`
+		Mongo 
 	}
 
 	// App -.
@@ -27,7 +27,7 @@ type (
 
 	// PG -.
 	Mongo struct {
-		URL string `env-required:"true" yaml:"url" env:"MONGODB_URL"`
+		URL string `env-required:"true" env:"MONGODB_URL"`
 	}
 )
 
