@@ -52,7 +52,7 @@ func Run(cfg *config.Config) {
 	// HTTP Server
 	server = gin.Default()
 	basePath := server.Group("/v1")
-	todoController.RegisterTodoRoutes(basePath)
+	todoController.RegisterTodoRoutes(basePath, todoService)
 
 	log.Fatal(server.Run(":8080"))
 

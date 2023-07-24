@@ -8,10 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TodoController struct {
-	TodoUsecase usecase.TodoService
-}
-
 func NewTodoController(todoService usecase.TodoService) TodoController {
 	return TodoController{
 		TodoUsecase: todoService,
@@ -73,15 +69,4 @@ func (tc *TodoController) DeleteTodo(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
-}
-
-// grouping the route for anything that has prefix /todo routes
-func (tc *TodoController) RegisterTodoRoutes(registerGroup *gin.RouterGroup) {
-	todoRoute := registerGroup.Group("/todo")
-
-	todoRoute.POST("/create", tc.CreateTodo)
-	todoRoute.GET("/get/:name", tc.GetTodo)
-	todoRoute.GET("/get", tc.GetAll)
-	todoRoute.POST("/update", tc.UpdateTodo)
-	todoRoute.DELETE("/delete/:name", tc.DeleteTodo)
 }
