@@ -9,9 +9,9 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App   `yaml:"app"`
-		HTTP  `yaml:"http"`
-		Mongo 
+		App  `yaml:"app"`
+		HTTP `yaml:"http"`
+		Mongo
 	}
 
 	// App -.
@@ -27,7 +27,7 @@ type (
 
 	// PG -.
 	Mongo struct {
-		URL string `env-required:"true" env:"MONGODB_URL"`
+		URL string ` env:"MONGODB_URL"  env-default:"mongodb://localhost:27017"`
 	}
 )
 
