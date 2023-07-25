@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewTodoController(todoService usecase.TodoService) TodoController {
+func NewTodoController(todoService usecase.TodoServiceImpl) TodoController {
 	return TodoController{
 		TodoUsecase: todoService,
 	}

@@ -6,6 +6,7 @@ import (
 	"example-evrone/config"
 	"example-evrone/internal/controller"
 	"example-evrone/internal/usecase"
+	"example-evrone/internal/usecase/repo"
 	"fmt"
 	"log"
 
@@ -18,7 +19,7 @@ import (
 
 var (
 	server         *gin.Engine
-	todoService    usecase.TodoService
+	todoService    usecase.TodoServiceImpl
 	todoController controller.TodoController
 	ctx            context.Context
 	todoCollection *mongo.Collection
@@ -44,7 +45,7 @@ func Run(cfg *config.Config) {
 	fmt.Println("MongoDB connection is successfull!")
 	todoCollection = mongoClient.Database("tododb").Collection("todos")
 	// Use case
-	todoService = usecase.NewTodoService(todoCollection, ctx)
+	todoService = *usecase.NewTodoService(repo.New(todoCollection, ctx))
 
 	// // Controller
 	todoController = controller.NewTodoController(todoService)

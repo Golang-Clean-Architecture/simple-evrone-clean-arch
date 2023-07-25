@@ -7,11 +7,11 @@ import (
 )
 
 type TodoController struct {
-	TodoUsecase usecase.TodoService
+	TodoUsecase usecase.TodoServiceImpl
 }
 
 // grouping the route for anything that has prefix /todo routes
-func (tc *TodoController) RegisterTodoRoutes(registerGroup *gin.RouterGroup, service usecase.TodoService) {
+func (tc *TodoController) RegisterTodoRoutes(registerGroup *gin.RouterGroup, service usecase.TodoServiceImpl) {
 	todoRoute := registerGroup.Group("/todo")
 	tc.TodoUsecase = service
 
