@@ -28,9 +28,9 @@ var (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	defer mongoClient.Disconnect(ctx)
 
 	// Repository
+	defer mongoClient.Disconnect(ctx)
 	ctx := context.TODO()
 	mongoConn := options.Client().ApplyURI(cfg.Mongo.URL)
 	mongoClient, err := mongo.Connect(ctx, mongoConn)

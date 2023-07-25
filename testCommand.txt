@@ -1,0 +1,4 @@
+go test ./...   --- Untuk mengetes semua folder/file  
+go test --- untuk mengetes suatu direktori
+go test -v --- untuk mengetes dan melihat fungsi mana yang di test
+go test -run namafungsi --- untuk mengetes suatu fungsi
