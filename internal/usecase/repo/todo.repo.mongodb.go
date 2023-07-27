@@ -22,6 +22,9 @@ func New(mongo *mongo.Collection, ctx context.Context) *TodoRepo {
 
 // receiver function or more like classes/struct method in python/java
 func (u *TodoRepo) CreateTodo(todo *entity.Todo) error {
+	if todo.Name == "" {
+		return errors.New("please fill todo name")
+	}
 	_, err := u.todoCollection.InsertOne(u.ctx, todo)
 	return err
 }

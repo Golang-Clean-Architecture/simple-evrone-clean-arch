@@ -23,6 +23,7 @@ func (tc *TodoController) CreateTodo(ctx *gin.Context) {
 	err := tc.TodoUsecase.CreateTodo(&todo)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }
