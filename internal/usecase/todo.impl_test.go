@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"example-evrone/internal/entity"
 	"fmt"
 	"testing"
@@ -21,41 +22,52 @@ func TestMain(m *testing.M) {
 }
 
 func TestTodoService_Get(t *testing.T) {
-	// t.Parallel()
+	t.Parallel()
 	// program mock
 	taskName := "Task 1"
+	taskName2 := "Task 2"
+
 	tests := []struct {
 		name     string
 		request  string
 		expected *string
-		mock     func(string)
+		err      error
+		mock     func()
 	}{
 		{
 			name:     "-------Retrieve correct TODO-------",
 			request:  taskName,
 			expected: &taskName,
-			mock: func(str string) {
-				todoRepository.Mock.On("GetTodo", &str).Return(entity.Todo{Name: "Task 1", Status: "On Going"})
+			err:      nil,
+			mock: func() {
+				todoRepository.Mock.On("GetTodo", &taskName).Return(entity.Todo{Name: "Task 1", Status: "On Going"}, nil)
 			},
 		},
 		{
 			name:     "-------Retrieve false TODO-------",
-			request:  taskName,
-			expected: &taskName,
-			mock: func(str string) {
-				todoRepository.Mock.On("GetTodo", &str).Return(nil)
+			request:  taskName2,
+			expected: nil,
+			err:      errors.New("not found"),
+			mock: func() {
+				todoRepository.Mock.On("GetTodo", &taskName2).Return(nil, errors.New("not found"))
 			},
 		},
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
-			// test := test
-			fmt.Println(test.name)
-			test.mock(test.request)
-			todo, _ := todoService.GetTodo(&test.request)
-			fmt.Println(todo)
-			assert.Equal(t, &todo.Name, test.expected)
+			// t.Parallel()
+
+			test.mock()
+			todo, errors := todoService.GetTodo(&test.request)
+			if todo == nil {
+				assert.Nil(t, test.expected, todo)
+				assert.Error(t, test.err, errors)
+			} else {
+				assert.Equal(t, test.expected, &todo.Name)
+				assert.ErrorIs(t, test.err, errors)
+			}
 		})
 	}
 }
