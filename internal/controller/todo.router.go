@@ -11,9 +11,8 @@ type TodoController struct {
 }
 
 // grouping the route for anything that has prefix /todo routes
-func (tc *TodoController) RegisterTodoRoutes(registerGroup *gin.RouterGroup, service usecase.TodoServiceImpl) {
+func (tc *TodoController) RegisterTodoRoutes(registerGroup *gin.RouterGroup) {
 	todoRoute := registerGroup.Group("/todo")
-	tc.TodoUsecase = service
 
 	todoRoute.POST("/create", tc.CreateTodo)
 	todoRoute.GET("/get/:name", tc.GetTodo)
