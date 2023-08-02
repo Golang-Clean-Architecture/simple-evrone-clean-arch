@@ -32,6 +32,7 @@ func TestTodoService_Get(t *testing.T) {
 		expected *string
 		err      error
 		mock     func()
+		assert   func(expected *string, reality *entity.Todo, expectedError error, realityError error)
 	}{
 		{
 			name:     "-------Retrieve correct TODO-------",
@@ -41,6 +42,10 @@ func TestTodoService_Get(t *testing.T) {
 			mock: func() {
 				todoRepository.Mock.On("GetTodo", &taskName).Return(entity.Todo{Name: "Task 1", Status: "On Going"}, nil)
 			},
+			assert: func(expected *string, reality *entity.Todo, expectedError error, realityError error) {
+				assert.Equal(t, expected, &reality.Name)
+				assert.ErrorIs(t, expectedError, realityError)
+			},
 		},
 		{
 			name:     "-------Retrieve false TODO-------",
@@ -49,6 +54,10 @@ func TestTodoService_Get(t *testing.T) {
 			err:      errors.New("not found"),
 			mock: func() {
 				todoRepository.Mock.On("GetTodo", &taskName2).Return(nil, errors.New("not found"))
+			},
+			assert: func(expected *string, reality *entity.Todo, expectedError, realityError error) {
+				assert.Nil(t, expected, reality)
+				assert.Error(t, expectedError, realityError)
 			},
 		},
 	}
@@ -60,13 +69,9 @@ func TestTodoService_Get(t *testing.T) {
 
 			test.mock()
 			todo, errors := todoService.GetTodo(&test.request)
-			if todo == nil {
-				assert.Nil(t, test.expected, todo)
-				assert.Error(t, test.err, errors)
-			} else {
-				assert.Equal(t, test.expected, &todo.Name)
-				assert.ErrorIs(t, test.err, errors)
-			}
+
+			fmt.Println("test 1")
+			test.assert(test.expected, todo, test.err, errors)
 		})
 	}
 }
@@ -86,6 +91,7 @@ func TestTodoService_GetAll(t *testing.T) {
 		expected []*entity.Todo
 		err      error
 		mock     func()
+		assert   func(expected []*entity.Todo, reality []*entity.Todo, expectedError error, realityError error)
 	}{
 		{
 			name:     "-------Retrieve All TODO-------",
@@ -94,6 +100,10 @@ func TestTodoService_GetAll(t *testing.T) {
 			mock: func() {
 				todoRepository.Mock.On("GetAll").Return(sliceTodos, nil)
 			},
+			assert: func(expected, reality []*entity.Todo, expectedError, realityError error) {
+				assert.ErrorIs(t, expectedError, realityError)
+				assert.Equal(t, expected, reality)
+			},
 		},
 		{
 			name:     "-------Retrieve None TODO-------",
@@ -101,6 +111,10 @@ func TestTodoService_GetAll(t *testing.T) {
 			err:      errors.New("document is empty"),
 			mock: func() {
 				todoRepository.Mock.On("GetAll").Return(nil, errors.New("document is empty"))
+			},
+			assert: func(expected, reality []*entity.Todo, expectedError, realityError error) {
+				assert.Error(t, expectedError, realityError)
+				assert.Equal(t, expected, reality)
 			},
 		},
 	}
@@ -114,12 +128,7 @@ func TestTodoService_GetAll(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.mock()
 			todos, errorNew := todoService.GetAll()
-			if errorNew == nil {
-				assert.ErrorIs(t, test.err, errorNew)
-			} else {
-				assert.Error(t, test.err, errorNew)
-			}
-			assert.Equal(t, test.expected, todos)
+			test.assert(test.expected, todos, test.err, errorNew)
 		})
 	}
 }
@@ -137,6 +146,7 @@ func TestTodoService_CreateTodo(t *testing.T) {
 		err    error
 		mock   func()
 		entity *entity.Todo
+		assert func(expectedError error, realityError error)
 	}{
 		{
 			name:   "-------Create TODO-------",
@@ -145,6 +155,9 @@ func TestTodoService_CreateTodo(t *testing.T) {
 			mock: func() {
 				todoRepository.Mock.On("CreateTodo", &entityNew).Return(entityNew)
 			},
+			assert: func(expectedError, realityError error) {
+				assert.ErrorIs(t, expectedError, realityError)
+			},
 		},
 		{
 			name:   "-------Fail Create TODO-------",
@@ -152,6 +165,9 @@ func TestTodoService_CreateTodo(t *testing.T) {
 			entity: &entityFail,
 			mock: func() {
 				todoRepository.Mock.On("CreateTodo", &entityFail).Return(entityFail)
+			},
+			assert: func(expectedError, realityError error) {
+				assert.Error(t, expectedError, realityError)
 			},
 		},
 	}
@@ -165,11 +181,7 @@ func TestTodoService_CreateTodo(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.mock()
 			errorNew := todoService.CreateTodo(test.entity)
-			if errorNew == nil {
-				assert.ErrorIs(t, test.err, errorNew)
-			} else {
-				assert.Error(t, test.err, errorNew)
-			}
+			test.assert(test.err, errorNew)
 		})
 	}
 }
@@ -187,6 +199,7 @@ func TestTodoService_UpdateTodo(t *testing.T) {
 		err    error
 		mock   func()
 		entity *entity.Todo
+		assert func(expectedError error, realityError error)
 	}{
 		{
 			name:   "-------Update TODO-------",
@@ -195,6 +208,9 @@ func TestTodoService_UpdateTodo(t *testing.T) {
 			mock: func() {
 				todoRepository.Mock.On("UpdateTodo", &entityNew).Return(entityNew)
 			},
+			assert: func(expectedError, realityError error) {
+				assert.ErrorIs(t, expectedError, realityError)
+			},
 		},
 		{
 			name:   "-------Fail Update TODO-------",
@@ -202,6 +218,9 @@ func TestTodoService_UpdateTodo(t *testing.T) {
 			entity: &entityFail,
 			mock: func() {
 				todoRepository.Mock.On("UpdateTodo", &entityFail).Return(entityNew)
+			},
+			assert: func(expectedError, realityError error) {
+				assert.Error(t, expectedError, realityError)
 			},
 		},
 	}
@@ -215,11 +234,7 @@ func TestTodoService_UpdateTodo(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.mock()
 			errorNew := todoService.UpdateTodo(test.entity)
-			if errorNew == nil {
-				assert.ErrorIs(t, test.err, errorNew)
-			} else {
-				assert.Error(t, test.err, errorNew)
-			}
+			test.assert(test.err, errorNew)
 		})
 	}
 }
@@ -237,6 +252,7 @@ func TestTodoService_DeleteTodo(t *testing.T) {
 		err    error
 		mock   func()
 		entity *entity.Todo
+		assert func(expectedError error, realityError error)
 	}{
 		{
 			name:   "-------Delete TODO-------",
@@ -245,6 +261,9 @@ func TestTodoService_DeleteTodo(t *testing.T) {
 			mock: func() {
 				todoRepository.Mock.On("DeleteTodo", &entityNew.Name).Return(entityNew)
 			},
+			assert: func(expectedError, realityError error) {
+				assert.ErrorIs(t, expectedError, realityError)
+			},
 		},
 		{
 			name:   "-------Fail Delete TODO-------",
@@ -252,6 +271,9 @@ func TestTodoService_DeleteTodo(t *testing.T) {
 			entity: &entityFail,
 			mock: func() {
 				todoRepository.Mock.On("DeleteTodo", &entityFail.Name).Return(entityNew)
+			},
+			assert: func(expectedError, realityError error) {
+				assert.Error(t, expectedError, realityError)
 			},
 		},
 	}
@@ -265,11 +287,7 @@ func TestTodoService_DeleteTodo(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.mock()
 			errorNew := todoService.DeleteTodo(&test.entity.Name)
-			if errorNew == nil {
-				assert.ErrorIs(t, test.err, errorNew)
-			} else {
-				assert.Error(t, test.err, errorNew)
-			}
+			test.assert(test.err, errorNew)
 		})
 	}
 }
